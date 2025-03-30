@@ -238,14 +238,7 @@ Actual: Inconsistent pose estimation, likely due to poor lidar scan matching.
 Expected: EKF should compensate for drift.
 Actual: IMU noise causing fluctuations in `/filtered_odom`.
 
-## **5. Challenges and Debugging Steps**
-
-### **Current Issues**
-- **Loop closure not functioning** in VINS-Fusion.
-- **IMU drift compensation not converging** in EKF.
-- **Particle filter inconsistencies** in AMCL.
-
-## **6. Conclusion**
+## **5. Conclusion**
 The proposed approach is theoretically sound but currently has implementation challenges. Further debugging and tuning are needed to achieve accurate localization. The next steps include refining sensor calibration, parameter tuning, and debugging data fusion inconsistencies.
 
 ## Troubleshooting
