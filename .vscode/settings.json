@@ -1,0 +1,17 @@
+{
+    "python.analysis.typeCheckingMode": "off",
+    "python.autoComplete.extraPaths": [
+        "/home/ub22/NewFrostHack/install/tortoisebot_firmware/local/lib/python3.10/dist-packages",
+        "/home/ub22/NewFrostHack/install/tortoisebot_control/lib/python3.10/site-packages",
+        "/opt/ros/humble/lib/python3.10/site-packages",
+        "/opt/ros/humble/local/lib/python3.10/dist-packages",
+        ""
+    ],
+    "python.analysis.extraPaths": [
+        "/home/ub22/NewFrostHack/install/tortoisebot_firmware/local/lib/python3.10/dist-packages",
+        "/home/ub22/NewFrostHack/install/tortoisebot_control/lib/python3.10/site-packages",
+        "/opt/ros/humble/lib/python3.10/site-packages",
+        "/opt/ros/humble/local/lib/python3.10/dist-packages",
+        ""
+    ]
+}
