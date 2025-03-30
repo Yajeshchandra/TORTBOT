@@ -1,227 +1,319 @@
-# VINS-Fusion
+# Tortoisebot ROS2 Humble Release
 
-## ROS2 Humble version of VINS-Fusion, suitable for running on ARM devices
+![TortoiseBot Banner](https://github.com/rigbetellabs/tortoisebot_docs/raw/master/imgs/packaging/pack_front.png)
 
-### Notices
-It is now possibler to run VINS-Fusion on ROS2 Humble using ros2 launch or ros2 run.
+<div align="center">
 
-Code based in large part on [this repository](https://github.com/zinuok/VINS-Fusion-ROS2) by zinuok.
+![stars](https://img.shields.io/github/stars/rigbetellabs/tortoisebot?style=for-the-badge)
+![forks](https://img.shields.io/github/forks/rigbetellabs/tortoisebot?style=for-the-badge)
+![watchers](https://img.shields.io/github/watchers/rigbetellabs/tortoisebot?style=for-the-badge)
+![repo-size](https://img.shields.io/github/repo-size/rigbetellabs/tortoisebot?style=for-the-badge)
+![contributors](https://img.shields.io/github/contributors/rigbetellabs/tortoisebot?style=for-the-badge)
 
+</div>
 
->TO BE DELETED (to make package smaller):
->- GPU enable/disable features also have been added: refer [EuRoC config](https://github.com/zinuok/VINS-Fusion-ROS2/blob/main/config/euroc/euroc_stereo_imu_config.yaml#L19-L21) (refered from [here](https://github.com/pjrambo/VINS-Fusion-gpu) and [here](https://github.com/pjrambo/VINS-Fusion-gpu/issues/33#issuecomment-1097642597))
->  - The GPU version has some CUDA library [dependencies: OpenCV with CUDA](https://github.com/zinuok/VINS-Fusion-ROS2/blob/main/vins/src/featureTracker/feature_tracker.h#L21-L23). Therefore, if it is a bothersome to you and only need the cpu version, please comment the following compiler macro at line 14 in the 'feature_tracker.h':
->  ```cpp
->  #define GPU_MODE 1
->  ```
+<p align="center">
+<a href="#connect-with-us">Connect with Us</a> • 
+<a href="#about-tortoisebot">About</a> • 
+<a href="#installation">Installation</a> • 
+<a href="#setup">Setup</a> • 
+<a href="#demos">Demos</a> • 
+<a href="#troubleshooting">Troubleshooting</a>
+</p>
 
-### Prerequisites
-- **System**
-  - Ubuntu 20.04
-  - ROS2 humble
-- **Libraries**
-  - OpenCV & cv_bridge for ROS2 Humble
-  - Ceres Solver-2.1.0
-  - Eigen-3.3.9
+## About TortoiseBot 🐢🤖
 
+The TortoiseBot is a versatile robotic platform for ROS2 development, created and maintained by the team at RigBetel Labs LLP. This repository contains all the necessary software to set up and run your TortoiseBot with ROS2 Humble.
 
-### Build
-1. Install dependencies by running the `install_external_deps.sh` script (OpenCV, Ceres, Eigen will be installed)
+For comprehensive documentation, visit our [Wiki](https://github.com/rigbetellabs/tortoisebot/wiki/1.-Getting-Started).
 
-2. Build the package using colcon build
+## Connect with Us
+
+<div>
+
+[![Website](https://img.shields.io/website?down_color=lightgrey&down_message=offline&label=Rigbetellabs%20Website&style=for-the-badge&up_color=green&up_message=online&url=https%3A%2F%2Frigbetellabs.com%2F)](https://rigbetellabs.com/)
+[![Discord](https://img.shields.io/discord/890669104330063903?logo=Discord&style=for-the-badge)](https://rigbetellabs.com/discord)
+[![Youtube](https://img.shields.io/youtube/channel/subscribers/UCfIX89y8OvDIbEFZAAciHEA?label=YT%20Subscribers&style=for-the-badge)](https://www.youtube.com/channel/UCfIX89y8OvDIbEFZAAciHEA)
+
+</div>
+
+## Installation
+
+### 1. Install Required Dependencies
+
 ```bash
-colcon build --symlink-install
+# Set build optimization (optional but recommended)
+export WORKERS_BUILD_DEPS=$(nproc)
+
+# Install ROS2 packages and basic dependencies
+sudo apt-get update
+sudo apt-get install -y wget unzip
+sudo apt-get install -y ros-humble-vision-opencv ros-humble-cv-bridge ros-humble-image-transport
+sudo apt-get install -y ros-humble-imu-tools ros-humble-imu-complementary-filter ros-humble-robot-localization
+sudo apt-get install -y cmake libgoogle-glog-dev libatlas-base-dev libsuitesparse-dev libboost-python-dev libboost-dev libboost-filesystem-dev libboost-program-options-dev
 ```
 
+### 2. Create ROS2 Workspace and Build
 
-### Playing EuRoC dataset bags
-To download a sample EuRoC dataset bag, run `get_example_data.sh` script. Then convert the bag to ROS2 format using `rosbags-convert` script.
 ```bash
-./get_example_data.sh
-rosbags-convert data/V1_02_medium.bag --dst /output/path
+# Create and navigate to workspace
+mkdir -p ~/ROS_WS/src
+cd ~/ROS_WS
+
+# Clone repository
+git clone -b ros2-humble https://github.com/rigbetellabs/tortoisebot.git src
+
+# Build workspace
+colcon build
 ```
-In case you don't have `rosbags-convert` script, you can install it using `pip install rosbags` command.
-Then, you can play the bag using standard `ros2 bag play` command:
+
+If you encounter YDLidar-related build issues:
+
 ```bash
-ros2 bag play /data/V1_02_medium
+# Build YDLidar SDK manually
+cd ~/ROS_WS/src/YDLidar-SDK
+mkdir -p build && cd build
+cmake ..
+make -j$(nproc) 
+sudo make install
+
+# Return to workspace and build again
+cd ~/ROS_WS
+colcon build
 ```
 
+### 3. Install Advanced Dependencies (if needed)
 
-# ORIGINAL README
+#### OpenCV Installation
 
-# VINS-Fusion
-## An optimization-based multi-sensor state estimator
+```bash
+# Clone OpenCV repositories
+git clone https://github.com/opencv/opencv.git -b 4.8.0 --depth 1
+git clone https://github.com/opencv/opencv_contrib.git -b 4.8.0 --depth 1
 
-<img src="https://github.com/HKUST-Aerial-Robotics/VINS-Fusion/blob/master/support_files/image/vins_logo.png" width = 55% height = 55% div align=left />
-<img src="https://github.com/HKUST-Aerial-Robotics/VINS-Fusion/blob/master/support_files/image/kitti.png" width = 34% height = 34% div align=center />
+# Build OpenCV
+cd opencv
+mkdir build && cd build
+cmake -D CMAKE_BUILD_TYPE=RELEASE -D INSTALL_C_EXAMPLES=OFF -D INSTALL_PYTHON_EXAMPLES=OFF -D OPENCV_GENERATE_PKGCONFIG=ON -D BUILD_EXAMPLES=OFF -D OPENCV_ENABLE_NONFREE=ON -D WITH_IPP=OFF -D BUILD_TESTS=OFF -D BUILD_PERF_TESTS=OFF -D BUILD_opencv_adas=OFF -D BUILD_opencv_bgsegm=OFF -D BUILD_opencv_bioinspired=OFF -D BUILD_opencv_ccalib=OFF -D BUILD_opencv_datasets=ON -D BUILD_opencv_datasettools=OFF -D BUILD_opencv_face=OFF -D BUILD_opencv_latentsvm=OFF -D BUILD_opencv_line_descriptor=OFF -D BUILD_opencv_matlab=OFF -D BUILD_opencv_optflow=ON -D BUILD_opencv_reg=OFF -D BUILD_opencv_saliency=OFF -D BUILD_opencv_surface_matching=OFF -D BUILD_opencv_text=OFF -D BUILD_opencv_tracking=ON -D BUILD_opencv_xobjdetect=OFF -D BUILD_opencv_xphoto=OFF -D BUILD_opencv_stereo=OFF -D BUILD_opencv_hdf=OFF -D BUILD_opencv_cvv=OFF -D BUILD_opencv_fuzzy=OFF -D BUILD_opencv_dnn=OFF -D BUILD_opencv_dnn_objdetect=OFF -D BUILD_opencv_dnn_superres=OFF -D BUILD_opencv_dpm=OFF -D BUILD_opencv_quality=OFF -D BUILD_opencv_rapid=OFF -D BUILD_opencv_rgbd=OFF -D BUILD_opencv_sfm=OFF -D BUILD_opencv_shape=ON -D BUILD_opencv_stitching=OFF -D BUILD_opencv_structured_light=OFF -D BUILD_opencv_alphamat=OFF -D BUILD_opencv_aruco=OFF -D BUILD_opencv_phase_unwrapping=OFF -D BUILD_opencv_photo=OFF -D BUILD_opencv_gapi=OFF -D BUILD_opencv_video=ON -D BUILD_opencv_ml=OFF -D BUILD_opencv_python2=OFF -D WITH_GSTREAMER=OFF -D ENABLE_PRECOMPILED_HEADERS=OFF -D CMAKE_INSTALL_PREFIX=/usr/local -D OPENCV_EXTRA_MODULES_PATH=../../opencv_contrib/modules/ ../
 
-VINS-Fusion is an optimization-based multi-sensor state estimator, which achieves accurate self-localization for autonomous applications (drones, cars, and AR/VR). VINS-Fusion is an extension of [VINS-Mono](https://github.com/HKUST-Aerial-Robotics/VINS-Mono), which supports multiple visual-inertial sensor types (mono camera + IMU, stereo cameras + IMU, even stereo cameras only). We also show a toy example of fusing VINS with GPS. 
-**Features:**
-- multiple sensors support (stereo cameras / mono camera+IMU / stereo cameras+IMU)
-- online spatial calibration (transformation between camera and IMU)
-- online temporal calibration (time offset between camera and IMU)
-- visual loop closure
-
-<img src="https://github.com/HKUST-Aerial-Robotics/VINS-Fusion/blob/master/support_files/image/kitti_rank.png" width = 80% height = 80% />
-
-We are the **top** open-sourced stereo algorithm on [KITTI Odometry Benchmark](http://www.cvlibs.net/datasets/kitti/eval_odometry.php) (12.Jan.2019).
-
-**Authors:** [Tong Qin](http://www.qintonguav.com), Shaozu Cao, Jie Pan, [Peiliang Li](https://peiliangli.github.io/), and [Shaojie Shen](http://www.ece.ust.hk/ece.php/profile/facultydetail/eeshaojie) from the [Aerial Robotics Group](http://uav.ust.hk/), [HKUST](https://www.ust.hk/)
-
-**Videos:**
-
-<a href="https://www.youtube.com/embed/1qye82aW7nI" target="_blank"><img src="http://img.youtube.com/vi/1qye82aW7nI/0.jpg" 
-alt="VINS" width="320" height="240" border="10" /></a>
-
-
-**Related Paper:** (paper is not exactly same with code)
-
-* **Online Temporal Calibration for Monocular Visual-Inertial Systems**, Tong Qin, Shaojie Shen, IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS, 2018), **best student paper award** [pdf](https://ieeexplore.ieee.org/abstract/document/8593603)
-
-* **VINS-Mono: A Robust and Versatile Monocular Visual-Inertial State Estimator**, Tong Qin, Peiliang Li, Shaojie Shen, IEEE Transactions on Robotics [pdf](https://ieeexplore.ieee.org/document/8421746/?arnumber=8421746&source=authoralert) 
-
-
-*If you use VINS-Fusion for your academic research, please cite our related papers. [bib](https://github.com/HKUST-Aerial-Robotics/VINS-Fusion/blob/master/support_files/paper_bib.txt)*
-
-## 1. Prerequisites
-### 1.1 **Ubuntu** and **ROS**
-Ubuntu 64-bit 16.04 or 18.04.
-ROS Kinetic or Melodic. [ROS Installation](http://wiki.ros.org/ROS/Installation)
-
-
-### 1.2. **Ceres Solver**
-Follow [Ceres Installation](http://ceres-solver.org/installation.html).
-
-
-## 2. Build VINS-Fusion
-Clone the repository and catkin_make:
-```
-    cd ~/catkin_ws/src
-    git clone https://github.com/HKUST-Aerial-Robotics/VINS-Fusion.git
-    cd ../
-    catkin_make
-    source ~/catkin_ws/devel/setup.bash
-```
-(if you fail in this step, try to find another computer with clean system or reinstall Ubuntu and ROS)
-
-## 3. EuRoC Example
-Download [EuRoC MAV Dataset](http://projects.asl.ethz.ch/datasets/doku.php?id=kmavvisualinertialdatasets) to YOUR_DATASET_FOLDER. Take MH_01 for example, you can run VINS-Fusion with three sensor types (monocular camera + IMU, stereo cameras + IMU and stereo cameras). 
-Open four terminals, run vins odometry, visual loop closure(optional), rviz and play the bag file respectively. 
-Green path is VIO odometry; red path is odometry under visual loop closure.
-
-### 3.1 Monocualr camera + IMU
-
-```
-    roslaunch vins vins_rviz.launch
-    rosrun vins vins_node ~/catkin_ws/src/VINS-Fusion/config/euroc/euroc_mono_imu_config.yaml 
-    (optional) rosrun loop_fusion loop_fusion_node ~/catkin_ws/src/VINS-Fusion/config/euroc/euroc_mono_imu_config.yaml 
-    rosbag play YOUR_DATASET_FOLDER/MH_01_easy.bag
+make -j $WORKERS_BUILD_DEPS
+sudo make install
+sudo ldconfig
 ```
 
-### 3.2 Stereo cameras + IMU
+#### Eigen and Ceres Solver (for VINS-Fusion)
 
-```
-    roslaunch vins vins_rviz.launch
-    rosrun vins vins_node ~/catkin_ws/src/VINS-Fusion/config/euroc/euroc_stereo_imu_config.yaml 
-    (optional) rosrun loop_fusion loop_fusion_node ~/catkin_ws/src/VINS-Fusion/config/euroc/euroc_stereo_imu_config.yaml 
-    rosbag play YOUR_DATASET_FOLDER/MH_01_easy.bag
-```
+```bash
+# Install Eigen
+wget -O eigen-3.4.0.zip https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.zip 
+unzip eigen-3.4.0.zip 
+cd eigen-3.4.0 && mkdir build && cd build
+cmake ../ && sudo make install -j $WORKERS_BUILD_DEPS
+cd ../../
 
-### 3.3 Stereo cameras
+# Install Ceres Solver
+wget http://ceres-solver.org/ceres-solver-2.1.0.tar.gz
+tar zxf ceres-solver-2.1.0.tar.gz
+cd ceres-solver-2.1.0
+mkdir build && cd build
+cmake -DEXPORT_BUILD_DIR=ON \
+      -DCMAKE_INSTALL_PREFIX=/usr/local \
+      ../
+make -j $WORKERS_BUILD_DEPS
+sudo make install -j $WORKERS_BUILD_DEPS
 
-```
-    roslaunch vins vins_rviz.launch
-    rosrun vins vins_node ~/catkin_ws/src/VINS-Fusion/config/euroc/euroc_stereo_config.yaml 
-    (optional) rosrun loop_fusion loop_fusion_node ~/catkin_ws/src/VINS-Fusion/config/euroc/euroc_stereo_config.yaml 
-    rosbag play YOUR_DATASET_FOLDER/MH_01_easy.bag
-```
-
-<img src="https://github.com/HKUST-Aerial-Robotics/VINS-Fusion/blob/master/support_files/image/euroc.gif" width = 430 height = 240 />
-
-
-## 4. KITTI Example
-### 4.1 KITTI Odometry (Stereo)
-Download [KITTI Odometry dataset](http://www.cvlibs.net/datasets/kitti/eval_odometry.php) to YOUR_DATASET_FOLDER. Take sequences 00 for example,
-Open two terminals, run vins and rviz respectively. 
-(We evaluated odometry on KITTI benchmark without loop closure funtion)
-```
-    roslaunch vins vins_rviz.launch
-    (optional) rosrun loop_fusion loop_fusion_node ~/catkin_ws/src/VINS-Fusion/config/kitti_odom/kitti_config00-02.yaml
-    rosrun vins kitti_odom_test ~/catkin_ws/src/VINS-Fusion/config/kitti_odom/kitti_config00-02.yaml YOUR_DATASET_FOLDER/sequences/00/ 
-```
-### 4.2 KITTI GPS Fusion (Stereo + GPS)
-Download [KITTI raw dataset](http://www.cvlibs.net/datasets/kitti/raw_data.php) to YOUR_DATASET_FOLDER. Take [2011_10_03_drive_0027_synced](https://s3.eu-central-1.amazonaws.com/avg-kitti/raw_data/2011_10_03_drive_0027/2011_10_03_drive_0027_sync.zip) for example.
-Open three terminals, run vins, global fusion and rviz respectively. 
-Green path is VIO odometry; blue path is odometry under GPS global fusion.
-```
-    roslaunch vins vins_rviz.launch
-    rosrun vins kitti_gps_test ~/catkin_ws/src/VINS-Fusion/config/kitti_raw/kitti_10_03_config.yaml YOUR_DATASET_FOLDER/2011_10_03_drive_0027_sync/ 
-    rosrun global_fusion global_fusion_node
+# Clean up environment variable
+unset WORKERS_BUILD_DEPS
 ```
 
-<img src="https://github.com/HKUST-Aerial-Robotics/VINS-Fusion/blob/master/support_files/image/kitti.gif" width = 430 height = 240 />
+## Setup
 
-## 5. VINS-Fusion on car demonstration
-Download [car bag](https://drive.google.com/open?id=10t9H1u8pMGDOI6Q2w2uezEq5Ib-Z8tLz) to YOUR_DATASET_FOLDER.
-Open four terminals, run vins odometry, visual loop closure(optional), rviz and play the bag file respectively. 
-Green path is VIO odometry; red path is odometry under visual loop closure.
+### Robot Setup
+
+- For basic operation, launch the bringup file:
+  ```bash
+  ros2 launch tortoisebot_bringup bringup.launch.py
+  ```
+
+- For complete operation with navigation and SLAM/localization:
+  ```bash
+  ros2 launch tortoisebot_bringup autobringup.launch.py use_sim_time:=True exploration:=True
+  ```
+  - Use `exploration:=False` when using a saved map for navigation
+  - Use `use_sim_time:=False` when working with a physical robot
+
+### Launch Files Reference
+
+- **SLAM**: `cartographer.launch.py`
+- **Navigation**: `navigation.launch.py`
+- **Rviz**: `rviz.launch.py`
+- **Gazebo**: `gazebo.launch.py`
+
+### Remote PC Setup
+
+When building on a remote PC, ignore packages that require hardware connection:
+
+```bash
+colcon build --packages-ignore ydlidar_sdk ydlidar_ros2_driver v4l2_camera
 ```
-    roslaunch vins vins_rviz.launch
-    rosrun vins vins_node ~/catkin_ws/src/VINS-Fusion/config/vi_car/vi_car.yaml 
-    (optional) rosrun loop_fusion loop_fusion_node ~/catkin_ws/src/VINS-Fusion/config/vi_car/vi_car.yaml 
-    rosbag play YOUR_DATASET_FOLDER/car.bag
+
+### Visual-Inertial Navigation with VINS-Fusion
+
+To run VINS-Fusion visual-inertial odometry:
+
+```bash
+ros2 run vins vins_node src/tortoisebot_description/raspicam/raspicam_mono_imu.yaml --ros-args --log-level info
 ```
 
-<img src="https://github.com/HKUST-Aerial-Robotics/VINS-Fusion/blob/master/support_files/image/car_gif.gif" width = 430 height = 240  />
+For pose graph optimization (loop closure):
 
-
-## 6. Run with your devices 
-VIO is not only a software algorithm, it heavily relies on hardware quality. For beginners, we recommend you to run VIO with professional equipment, which contains global shutter cameras and hardware synchronization.
-
-### 6.1 Configuration file
-Write a config file for your device. You can take config files of EuRoC and KITTI as the example. 
-
-### 6.2 Camera calibration
-VINS-Fusion support several camera models (pinhole, mei, equidistant). You can use [camera model](https://github.com/hengli/camodocal) to calibrate your cameras. We put some example data under /camera_models/calibrationdata to tell you how to calibrate.
-```
-cd ~/catkin_ws/src/VINS-Fusion/camera_models/camera_calib_example/
-rosrun camera_models Calibrations -w 12 -h 8 -s 80 -i calibrationdata --camera-model pinhole
+```bash
+ros2 run loop_fusion loop_fusion_node src/tortoisebot_description/raspicam/raspicam_mono_imu.yaml --ros-args --log-level info
 ```
 
-## 7. Docker Support
-To further facilitate the building process, we add docker in our code. Docker environment is like a sandbox, thus makes our code environment-independent. To run with docker, first make sure [ros](http://wiki.ros.org/ROS/Installation) and [docker](https://docs.docker.com/install/linux/docker-ce/ubuntu/) are installed on your machine. Then add your account to `docker` group by `sudo usermod -aG docker $YOUR_USER_NAME`. **Relaunch the terminal or logout and re-login if you get `Permission denied` error**, type:
+### EKF and Robot Localization
+
+To run ekf node
+```bash
+ros2 launch tortoisebot_bringup ekf.launch.py
 ```
-cd ~/catkin_ws/src/VINS-Fusion/docker
-make build
+
+## Demos
+
+The TortoiseBot supports multiple demo applications including:
+- Teleoperation
+- Mapping
+- Autonomous Navigation
+- Sensor Visualization (Lidar, Odometry, Camera)
+
+# **Fusion of VINS-Fusion, AMCL, and IMU for Robot Localization**
+
+## **1. Introduction**
+This document presents an approach to combining **Visual-Inertial Odometry (VINS-Fusion)**, **Adaptive Monte Carlo Localization (AMCL)**, and **IMU-based filtering (EKF/UKF)** for robust localization of **TortoiseBot** in **ROS 2 Humble**. The approach is based on theoretical foundations and initial experimental validation.
+
+## **2. Methodology**
+The localization system consists of the following components:
+
+- **VINS-Fusion**: Provides **relative** pose estimation using camera and IMU data.
+- **AMCL**: Corrects **global** localization by comparing laser scan data with a known map.
+- **IMU + EKF/UKF**: Fuses acceleration and gyroscope data for short-term stability.
+- **Fusion Strategy**: The `robot_localization` package (EKF/UKF) is used to merge multiple odometry sources.
+
+### **Data Flow**
+```plaintext
+[Camera + IMU] --(VINS-Fusion)--> /odometry
+[Lidar] --(AMCL)--> /amcl_pose
+[IMU] --> /imu_plugin/out
+[Wheel Odometry] --> /odom
+All Inputs --> (EKF/UKF) --> /filtered_odom
 ```
-Note that the docker building process may take a while depends on your network and machine. After VINS-Fusion successfully built, you can run vins estimator with script `run.sh`.
-Script `run.sh` can take several flags and arguments. Flag `-k` means KITTI, `-l` represents loop fusion, and `-g` stands for global fusion. You can get the usage details by `./run.sh -h`. Here are some examples with this script:
-```
-# Euroc Monocualr camera + IMU
-./run.sh ~/catkin_ws/src/VINS-Fusion/config/euroc/euroc_mono_imu_config.yaml
 
-# Euroc Stereo cameras + IMU with loop fusion
-./run.sh -l ~/catkin_ws/src/VINS-Fusion/config/euroc/euroc_mono_imu_config.yaml
+## **3. Implementation**
 
-# KITTI Odometry (Stereo)
-./run.sh -k ~/catkin_ws/src/VINS-Fusion/config/kitti_odom/kitti_config00-02.yaml YOUR_DATASET_FOLDER/sequences/00/
+### **VINS-Fusion Setup**
+- Camera-IMU calibration using `kalibr` [in our case malually calculated]
+- Feature extraction and tracking for visual odometry
+- Loop closure for drift correction [Optional]
 
-# KITTI Odometry (Stereo) with loop fusion
-./run.sh -kl ~/catkin_ws/src/VINS-Fusion/config/kitti_odom/kitti_config00-02.yaml YOUR_DATASET_FOLDER/sequences/00/
+### **AMCL Configuration**
+- Particle filter for global localization
+- Scan matching using laser data (`/scan` topic)
+- Dynamic re-sampling based on motion model
 
-#  KITTI GPS Fusion (Stereo + GPS)
-./run.sh -kg ~/catkin_ws/src/VINS-Fusion/config/kitti_raw/kitti_10_03_config.yaml YOUR_DATASET_FOLDER/2011_10_03_drive_0027_sync/
+### **EKF Node (robot_localization)**
+- Subscribes to `/odometry`, `/odom`, and `/imu_plugin/out`
+- Provides **drift-compensated** pose estimation on `/filtered_odom`
 
-```
-In Euroc cases, you need open another terminal and play your bag file. If you need modify the code, simply re-run `./run.sh` with proper auguments after your changes.
+## **4. Experimental Results**
 
+### **VINS-Fusion Output**
+Expected: `/vins_odom` should match ground truth.
+Actual: Observed drift due to poor feature tracking.
 
-## 8. Acknowledgements
-We use [ceres solver](http://ceres-solver.org/) for non-linear optimization and [DBoW2](https://github.com/dorian3d/DBoW2) for loop detection, a generic [camera model](https://github.com/hengli/camodocal) and [GeographicLib](https://geographiclib.sourceforge.io/).
+### **AMCL Pose Estimates**
+Expected: `/amcl_pose` should stabilize quickly.
+Actual: Inconsistent pose estimation, likely due to poor lidar scan matching.
 
-## 9. License
-The source code is released under [GPLv3](http://www.gnu.org/licenses/) license.
+### **IMU Drift Correction**
+Expected: EKF should compensate for drift.
+Actual: IMU noise causing fluctuations in `/filtered_odom`.
 
-We are still working on improving the code reliability. For any technical issues, please contact Tong Qin <qintonguavATgmail.com>.
+## **5. Challenges and Debugging Steps**
 
-For commercial inquiries, please contact Shaojie Shen <eeshaojieATust.hk>.
+### **Current Issues**
+- **Loop closure not functioning** in VINS-Fusion.
+- **IMU drift compensation not converging** in EKF.
+- **Particle filter inconsistencies** in AMCL.
+
+## **6. Conclusion**
+The proposed approach is theoretically sound but currently has implementation challenges. Further debugging and tuning are needed to achieve accurate localization. The next steps include refining sensor calibration, parameter tuning, and debugging data fusion inconsistencies.
+
+## Troubleshooting
+
+### Build Issues
+
+If you encounter build errors, try these steps in order:
+
+1. Rebuild workspace:
+   ```bash
+   colcon build
+   ```
+
+2. Clean and rebuild:
+   ```bash
+   rm -rf build/ install/ log/
+   colcon build
+   ```
+
+### Navigation and Localization Issues
+
+If you encounter problems with navigation components:
+
+1. Check if AMCL or map_server nodes are in error state:
+   ```bash
+   ros2 lifecycle list
+   ```
+
+2. Manually configure and activate the nodes:
+   ```bash
+   # For AMCL issues
+   ros2 lifecycle set /amcl configure
+   ros2 lifecycle set /amcl activate
+   
+   # For map server issues
+   ros2 lifecycle set /map_server configure
+   ros2 lifecycle set /map_server activate
+   ```
+
+3. Verify node status:
+   ```bash
+   ros2 lifecycle list
+   ```
+
+## Documentation
+
+For detailed documentation, please visit our Wiki:
+
+1. [Getting Started](https://github.com/rigbetellabs/tortoisebot/wiki/1.-Getting-Started)
+2. [Hardware Assembly](https://github.com/rigbetellabs/tortoisebot/wiki/2.-Hardware-Assembly)
+3. [TortoiseBot Setup](https://github.com/rigbetellabs/tortoisebot/wiki/3.-TortoiseBot-Setup)
+4. [Server PC Setup](https://github.com/rigbetellabs/tortoisebot/wiki/4.-Server-PC-Setup)
+5. [Running Demos](https://github.com/rigbetellabs/tortoisebot/wiki/5.-Running-Demos)
+
+[Join](https://discord.gg/qDuCSMTjvN) our community for free support. Post your projects or ask questions if you need any help.
+
+## About Us
+
+TortoiseBot is sourced, assembled, made & maintained by our team at:
+
+RigBetel Labs LLP®, Charholi Bk., via. Loheagaon, Pune - 412105, MH, India 🇮🇳  
+🌐 [RigBetelLabs.com](https://rigbetellabs.com)  
+📞 [+91-8432152998](https://wa.me/918432152998)  
+📨 getintouch.rbl@gmail.com, info@rigbetellabs.com  
+
+[LinkedIn](http://linkedin.com/company/rigbetellabs/) | 
+[Instagram](http://instagram.com/rigbetellabs/) | 
+[Facebook](http://facebook.com/rigbetellabs) | 
+[Twitter](http://twitter.com/rigbetellabs) | 
+[YouTube](https://www.youtube.com/channel/UCfIX89y8OvDIbEFZAAciHEA) | 
+[Discord Community](https://discord.gg/qDuCSMTjvN)

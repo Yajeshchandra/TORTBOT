@@ -22,6 +22,7 @@ def generate_launch_description():
   prefix_address = get_package_share_directory('tortoisebot_navigation') 
   default_model_path = os.path.join(pkg_share, 'models/urdf/tortoisebot_simple.xacro')
   default_rviz_config_path = os.path.join(get_package_share_directory('tortoisebot_description'), 'rviz/tortoisebot_sensor_display.rviz')
+  ekf_config_path = os.path.join(get_package_share_directory('tortoisebot_navigation'), 'config', 'ekf.yaml')
     
   
   params_file_sim = os.path.join(prefix_address, 'config', 'nav2_params_simulation.yaml')
