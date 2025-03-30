@@ -241,7 +241,7 @@ Actual: IMU noise causing fluctuations in `/filtered_odom`.
 ## **5. Conclusion**
 The proposed approach is theoretically sound but currently has implementation challenges. Further debugging and tuning are needed to achieve accurate localization. The next steps include refining sensor calibration, parameter tuning, and debugging data fusion inconsistencies.
 
-[![Watch the video](https://youtu.be/4MctUURRlWI)
+[![Watch the video](https://youtu.be/4MctUURRlWI?feature=shared)
 
 ## Troubleshooting
 
