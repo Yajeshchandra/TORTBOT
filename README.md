@@ -1,41 +1,12 @@
-# Tortoisebot ROS2 Humble Release
+# Introduction
 
-![TortoiseBot Banner](https://github.com/rigbetellabs/tortoisebot_docs/raw/master/imgs/packaging/pack_front.png)
-
-<div align="center">
-
-![stars](https://img.shields.io/github/stars/rigbetellabs/tortoisebot?style=for-the-badge)
-![forks](https://img.shields.io/github/forks/rigbetellabs/tortoisebot?style=for-the-badge)
-![watchers](https://img.shields.io/github/watchers/rigbetellabs/tortoisebot?style=for-the-badge)
-![repo-size](https://img.shields.io/github/repo-size/rigbetellabs/tortoisebot?style=for-the-badge)
-![contributors](https://img.shields.io/github/contributors/rigbetellabs/tortoisebot?style=for-the-badge)
-
-</div>
-
-<p align="center">
-<a href="#connect-with-us">Connect with Us</a> • 
-<a href="#about-tortoisebot">About</a> • 
-<a href="#installation">Installation</a> • 
-<a href="#setup">Setup</a> • 
-<a href="#demos">Demos</a> • 
-<a href="#troubleshooting">Troubleshooting</a>
-</p>
+This repository presents my submission for FrostHack'25, where I developed a computer vision-based localization system tailored for constrained environments. The system integrates multiple sensor streams to estimate accurate position and orientation of a mobile platform.
 
 ## About TortoiseBot 🐢🤖
 
 The TortoiseBot is a versatile robotic platform for ROS2 development, created and maintained by the team at RigBetel Labs LLP. This repository contains all the necessary software to set up and run your TortoiseBot with ROS2 Humble.
 
-For comprehensive documentation, visit our [Wiki](https://github.com/rigbetellabs/tortoisebot/wiki/1.-Getting-Started).
-
-## Connect with Us
-
-<div>
-
-[![Website](https://img.shields.io/website?down_color=lightgrey&down_message=offline&label=Rigbetellabs%20Website&style=for-the-badge&up_color=green&up_message=online&url=https%3A%2F%2Frigbetellabs.com%2F)](https://rigbetellabs.com/)
-[![Discord](https://img.shields.io/discord/890669104330063903?logo=Discord&style=for-the-badge)](https://rigbetellabs.com/discord)
-[![Youtube](https://img.shields.io/youtube/channel/subscribers/UCfIX89y8OvDIbEFZAAciHEA?label=YT%20Subscribers&style=for-the-badge)](https://www.youtube.com/channel/UCfIX89y8OvDIbEFZAAciHEA)
-
-</div>
+For comprehensive documentation, visit [Wiki](https://github.com/rigbetellabs/tortoisebot/wiki/1.-Getting-Started).
 
 ## Installation
 
